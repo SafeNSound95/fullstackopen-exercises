@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const Blog = require('../models/blog')
 
 const initialBlogs = [
   {title:"Prisoner",author:"him",url:"www.him.com",likes:15}, 
@@ -62,13 +63,28 @@ const mostLikes = (blogPostsArray) => {
   return {author:authorWithMostLikes, likes:mostLikes}
 }
 
+const blogsInDb = async () => {
+   const blogs = await Blog.find({})
+   return blogs.map(blog => blog.toJSON())
+}
+
+const nonExistingId = async () => {
+  const blog = new Blog({ url: 'www.wowza.com', title:'hey now'})
+  await blog.save()
+  await blog.deleteOne()
+
+  return blog._id.toString()
+}
+
 module.exports = {
   initialBlogs,
   dummy,
   totalLikes,
   favoriteBlog,
   mostBlogs,
-  mostLikes
+  mostLikes,
+  blogsInDb,
+  nonExistingId
 }
 
 
