@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useState } from 'react'
 
 const BlogForm = ({ addBlog }) => {
-  const [title, setTitle] = useState("")
-  const [author, setAuthor] = useState("")
-  const [url, setUrl] = useState("")
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
   const createBlog = (e) => {
     e.preventDefault()
@@ -15,15 +15,15 @@ const BlogForm = ({ addBlog }) => {
     }
 
     addBlog(blog)
-    setTitle("")
-    setAuthor("")
-    setUrl("")
+    setTitle('')
+    setAuthor('')
+    setUrl('')
   }
 
   return(
     <>
       <h2>create new</h2>
-      
+
       <form onSubmit={createBlog}>
         <label>
           title
