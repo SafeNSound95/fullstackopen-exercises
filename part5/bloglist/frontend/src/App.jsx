@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -28,6 +29,8 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  const blogFormRef = useRef()
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -70,6 +73,7 @@ const App = () => {
     setClassName('success')
     setMessage(`a new blog: ${savedBlog.title} by ${savedBlog.author}`)
     setTimeout(() => setMessage(null), 5000)
+    blogFormRef.current.toggleVisibility()
     }
     catch(error) {
       setClassName('error')
@@ -80,6 +84,17 @@ const App = () => {
     }
   }
 
+  const addLike = async (blog) => {
+    const updatedBlog = {
+      ...blog,
+      likes: blog.likes + 1,
+      user: blog.user?.id
+    }
+
+    const returnedBlog = await blogService.update(blog.id, updatedBlog)
+    setBlogs(blogs.map(b => b.id !== blog.id ? b : returnedBlog))
+  }
+
   const showBlogs = () => {
     return <div>
       <Notification message={message} classname={classname}/>
@@ -87,9 +102,11 @@ const App = () => {
       <button onClick={handleLogOut}>log out</button>
       <h2>blogs</h2>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} addLike={addLike} />
       )}
-      <BlogForm addBlog={addBlog}/>
+      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+        <BlogForm addBlog={addBlog}/>
+      </Togglable>
      </div>
   }
 
