@@ -1,0 +1,109 @@
+import { useState, useEffect } from 'react'
+import Blog from './components/Blog'
+import blogService from './services/blogs'
+import loginService from './services/login'
+import LoginForm from './components/LoginForm'
+import BlogForm from './components/BlogForm'
+import Notification from './components/Notification'
+
+const App = () => {
+  const [blogs, setBlogs] = useState([])
+  const [user, setUser] = useState(null)
+  const [ username, setUsername ] = useState('')
+  const [ password, setPassword ] = useState('')
+  const [message, setMessage] = useState(null)
+  const [classname, setClassName] = useState(null)
+
+  useEffect(() => {
+    blogService.getAll().then(blogs =>
+      setBlogs( blogs )
+    )  
+  }, [])
+
+    useEffect(() => {
+    const loggedInUser = window.localStorage.getItem('loggedInUser')
+    if (loggedInUser) {
+      const user = JSON.parse(loggedInUser)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    try{
+      const user = await loginService.login({ username, password })
+      window.localStorage.setItem(
+       'loggedInUser', JSON.stringify(user)
+      )
+      setUser(user)
+      blogService.setToken(user.token)
+      setUsername('')
+      setPassword('')
+    }
+    catch(error) {
+      setClassName('error')
+      setMessage('Wrong credentials')
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+    }
+  }
+
+  const handleLogOut = () => {
+    window.localStorage.removeItem('loggedInUser')
+    setUser(null)
+  }
+
+  const handleUsername = (e) => {
+    setUsername(e.target.value)
+  }
+
+  const handlePassword = (e) => {
+    setPassword(e.target.value)
+  }
+
+  const addBlog = async (blog) => {
+    try { 
+    const savedBlog = await blogService.create(blog)
+    setBlogs(blogs.concat(savedBlog))
+    setClassName('success')
+    setMessage(`a new blog: ${savedBlog.title} by ${savedBlog.author}`)
+    setTimeout(() => setMessage(null), 5000)
+    }
+    catch(error) {
+      setClassName('error')
+      setMessage(error.response.data.error)
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+    }
+  }
+
+  const showBlogs = () => {
+    return <div>
+      <Notification message={message} classname={classname}/>
+      <p>{user.name} logged in</p>
+      <button onClick={handleLogOut}>log out</button>
+      <h2>blogs</h2>
+      {blogs.map(blog =>
+        <Blog key={blog.id} blog={blog} />
+      )}
+      <BlogForm addBlog={addBlog}/>
+     </div>
+  }
+
+return (
+  user === null 
+    ? <LoginForm 
+        username={username} 
+        password={password} 
+        handleUsername={handleUsername} 
+        handlePassword={handlePassword} 
+        handleLogin={handleLogin} 
+      />
+    : showBlogs()
+)
+}
+
+export default App
