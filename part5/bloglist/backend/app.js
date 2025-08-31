@@ -6,6 +6,7 @@ const config = require('./utils/config')
 const blogsRouter = require('./controllers/blogs')
 const userRouter = require('./controllers/users')
 const loginRouter = require('./controllers/login')
+const testingRouter = require('./controllers/testing')
 const errorHandler = require('./utils/middleware').errorHandler
 
 logger.info('connecting to', config.MONGODB_URI)
@@ -27,6 +28,11 @@ app.use(express.json())
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', userRouter)
 app.use('/api/login', loginRouter)
+
+if (process.env.NODE_ENV === 'test') {
+  const testingRouter = require('./controllers/testing')
+  app.use('/api/testing', testingRouter)
+}
 app.use(errorHandler)
 
 module.exports = app
