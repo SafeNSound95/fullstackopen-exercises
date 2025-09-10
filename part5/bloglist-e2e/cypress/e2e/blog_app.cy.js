@@ -65,7 +65,35 @@ describe('Blog app', function() {
        cy.contains('like').click()
        cy.contains('likes 1')
       })
+
+      it('it can be deleted', function() {
+        cy.contains('show').click()
+        cy.contains('remove').click()
+        cy.contains('another blog created by cypress').should('not.exist')
+      })
+
+     it('other users cannot see remove button', function() {
+        cy.contains('log out').click()
+
+        cy.request({
+          method: 'POST',
+          url: 'http://localhost:3001/api/users',
+          body: { username:'tester2', name:'tester two', password:'5678' }
+        }).then((response) => {
+          expect(response.status).to.eq(201)
+        })
+
+        cy.contains('login').click()
+        cy.get('#username').type('tester2')
+        cy.get('#password').type('5678')
+        cy.get('#login-button').click()
+
+        cy.contains('show').click()
+
+        cy.contains('another blog created by cypress')
+          .parent()
+          .should('not.contain', 'remove')
+      })
     })
   })
-
 })
