@@ -5,12 +5,24 @@ const App = () => {
   const dispatch = useDispatch()
 
   const vote = (id) => {
-    console.log('vote', id)
+    dispatch({ type:'VOTE', payload: id})
+  }
+
+  const addAnecdote = (e) => {
+    e.preventDefault()
+    const content = e.target.newAnecdote.value
+    e.target.newAnecdote.value = ''
+    dispatch({ type:'ADD_ANECDOTE', payload:content })
+  }
+
+  const sort = () => {
+    dispatch({ type:'SORT' })
   }
 
   return (
     <div>
       <h2>Anecdotes</h2>
+      <button onClick={sort}>sort</button>
       {anecdotes.map(anecdote =>
         <div key={anecdote.id}>
           <div>
@@ -23,9 +35,9 @@ const App = () => {
         </div>
       )}
       <h2>create new</h2>
-      <form>
-        <div><input /></div>
-        <button>create</button>
+      <form onSubmit={addAnecdote}>
+        <div><input name="newAnecdote"/></div>
+        <button type='submit'>create</button>
       </form>
     </div>
   )
